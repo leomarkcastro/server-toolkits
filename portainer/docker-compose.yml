@@ -1,0 +1,26 @@
+version: "3"
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    volumes:
+      - data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer-http.entrypoints=web"
+      - "traefik.http.routers.portainer-http.rule=Host(`portainer.aws-xps.xyzapps.xyz`)"
+      - "traefik.http.routers.portainer-http.middlewares=portainer-https"
+      - "traefik.http.middlewares.portainer-https.redirectscheme.scheme=https"
+      - "traefik.http.services.portainer-https.loadbalancer.server.port=9000"
+      - "traefik.http.routers.portainer-https.entrypoints=websecure"
+      - "traefik.http.routers.portainer-https.rule=Host(`portainer.aws-xps.xyzapps.xyz`)"
+      - "traefik.http.routers.portainer-https.tls.certresolver=letsencrypt"
+networks:
+  proxy:
+    external:
+      name: proxy
+volumes:
+  data:
